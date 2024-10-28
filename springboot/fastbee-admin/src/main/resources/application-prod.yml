@@ -1,0 +1,122 @@
+# 数据源配置
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    druid:
+      # 主库数据源
+      master:
+        url: jdbc:mysql://177.7.0.11/fastbee?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+        username: root
+        password: fastbee
+      # 从库数据源
+      slave:
+        enabled: false      # 从数据源开关/默认关闭
+        url:
+        username:
+        password:
+
+      initialSize: 5                        # 初始连接数
+      minIdle: 10                           # 最小连接池数量
+      maxActive: 20                         # 最大连接池数量
+      maxWait: 60000                        # 配置获取连接等待超时的时间
+      timeBetweenEvictionRunsMillis: 60000  # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+      minEvictableIdleTimeMillis: 300000    # 配置一个连接在池中最小生存的时间，单位是毫秒
+      maxEvictableIdleTimeMillis: 900000    # 配置一个连接在池中最大生存的时间，单位是毫秒
+      validationQuery: SELECT 1 FROM DUAL   # 配置检测连接是否有效
+      testWhileIdle: true
+      testOnBorrow: false
+      testOnReturn: false
+      webStatFilter:
+        enabled: true
+      statViewServlet:
+        enabled: true
+        # 设置白名单，不填则允许所有访问
+        allow:
+        url-pattern: /druid/*
+        # 控制台管理用户名和密码
+        login-username: fastbee
+        login-password: fastbee
+      filter:
+        stat:
+          enabled: true
+          # 慢SQL记录
+          log-slow-sql: true
+          slow-sql-millis: 1000
+          merge-sql: true
+        wall:
+          config:
+            multi-statement-allow: true
+  # redis 配置
+  redis:
+    host: 177.7.0.10                        # 地址
+    port: 6379                              # 端口，默认为6379
+    database: 0                             # 数据库索引
+    password: fastbee                       # 密码
+    timeout: 10s                            # 连接超时时间
+    lettuce:
+      pool:
+        min-idle: 0                         # 连接池中的最小空闲连接
+        max-idle: 8                         # 连接池中的最大空闲连接
+        max-active: 8                       # 连接池的最大数据库连接数
+        max-wait: -1ms                      # 连接池最大阻塞等待时间（使用负值表示没有限制）
+  # mqtt 配置
+  mqtt:
+    username: fastbee                       # 账号（仅用于后端自认证）
+    password: fastbee                       # 密码（仅用于后端自认证）
+    host-url: tcp://177.7.0.12:1883         # 连接消息服务器地址
+    client-id: ${random.int}                # 客户端Id，不能相同，采用随机数 ${random.value}
+    default-topic: test                     # 默认主题
+    timeout: 30                             # 超时时间
+    keepalive: 30                           # 保持连接
+    clearSession: true                      # 清除会话(设置为false,断开连接，重连后使用原来的会话 保留订阅的主题，能接收离线期间的消息)
+
+# sip 配置
+sip:
+  enabled: true                             # 是否启用视频监控SIP，true为启用
+  ## 本地调试时，绑定网卡局域网IP，设备在同一局域网，设备接入IP填写绑定IP
+  ## 部署服务端时，默认绑定容器IP，设备接入IP填写服务器公网IP
+  ip: 177.7.0.12
+  port: 5061                                # SIP端口(保持默认)
+  domain: 3402000000                        # 由省级、市级、区级、基层编号组成
+  id: 34020000002000000001                  # 同上，另外增加编号，(可保持默认)
+  password: 12345678                        # 监控设备接入的密码
+
+# 日志配置
+logging:
+  level:
+    com.fastbee: error
+    org.springframework: warn
+
+# Swagger配置
+swagger:
+  enabled: true                             # 是否开启swagger
+  pathMapping: /prod-api                    # 请求前缀
+
+liteflow:
+  rule-source-ext-data-map:
+    # 应用名称，规则链和脚本组件名称需要一致，不要修改
+    applicationName: fastbee
+    #是否开启SQL日志
+    sqlLogEnabled: true
+    # 规则多时，启用快速加载模式
+    fast-load: false
+    #是否开启SQL数据轮询自动刷新机制 默认不开启
+    pollingEnabled: false
+    pollingIntervalSeconds: 60
+    pollingStartSeconds: 60
+    #以下是chain表的配置
+    chainTableName: iot_scene
+    chainApplicationNameField: application_name
+    chainNameField: chain_name
+    elDataField: el_data
+    chainEnableField: enable
+    #以下是script表的配置
+    scriptTableName: iot_script
+    scriptApplicationNameField: application_name
+    scriptIdField: script_id
+    scriptNameField: script_name
+    scriptDataField: script_data
+    scriptTypeField: script_type
+    scriptLanguageField: script_language
+    scriptEnableField: enable
